@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="payment/gateway/mercadopago/db"
+       VERSION="2026071300"
+       COMMENT="XMLDB file for the Mercado Pago payment gateway"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd">
+
+    <TABLES>
+        <TABLE NAME="paygw_mercadopago_transactions"
+               COMMENT="Stores Mercado Pago payment transactions">
+
+            <FIELDS>
+                <FIELD NAME="id"
+                       TYPE="int"
+                       LENGTH="10"
+                       NOTNULL="true"
+                       SEQUENCE="true"/>
+
+                <FIELD NAME="userid"
+                       TYPE="int"
+                       LENGTH="10"
+                       NOTNULL="true"
+                       SEQUENCE="false"/>
+
+                <FIELD NAME="accountid"
+                       TYPE="int"
+                       LENGTH="10"
+                       NOTNULL="true"
+                       SEQUENCE="false"/>
+
+                <FIELD NAME="component"
+                       TYPE="char"
+                       LENGTH="100"
+                       NOTNULL="true"
+                       SEQUENCE="false"/>
+
+                <FIELD NAME="paymentarea"
+                       TYPE="char"
+                       LENGTH="100"
+                       NOTNULL="true"
+                       SEQUENCE="false"/>
+
+                <FIELD NAME="itemid"
+                       TYPE="int"
+                       LENGTH="10"
+                       NOTNULL="true"
+                       SEQUENCE="false"/>
+
+                <FIELD NAME="amount"
+                       TYPE="number"
+                       LENGTH="20"
+                       DECIMALS="5"
+                       NOTNULL="true"
+                       SEQUENCE="false"/>
+
+                <FIELD NAME="currency"
+                       TYPE="char"
+                       LENGTH="3"
+                       NOTNULL="true"
+                       SEQUENCE="false"/>
+
+                <FIELD NAME="externalreference"
+                       TYPE="char"
+                       LENGTH="36"
+                       NOTNULL="true"
+                       SEQUENCE="false"/>
+
+                <FIELD NAME="preferenceid"
+                       TYPE="char"
+                       LENGTH="255"
+                       NOTNULL="false"
+                       SEQUENCE="false"/>
+
+                <FIELD NAME="paymentid"
+                       TYPE="char"
+                       LENGTH="100"
+                       NOTNULL="false"
+                       SEQUENCE="false"/>
+
+                <FIELD NAME="internalstatus"
+                       TYPE="char"
+                       LENGTH="20"
+                       NOTNULL="true"
+                       DEFAULT="created"
+                       SEQUENCE="false"/>
+
+                <FIELD NAME="externalstatus"
+                       TYPE="char"
+                       LENGTH="50"
+                       NOTNULL="false"
+                       SEQUENCE="false"/>
+
+                <FIELD NAME="delivered"
+                       TYPE="int"
+                       LENGTH="1"
+                       NOTNULL="true"
+                       DEFAULT="0"
+                       SEQUENCE="false"/>
+
+                <FIELD NAME="attempts"
+                       TYPE="int"
+                       LENGTH="10"
+                       NOTNULL="true"
+                       DEFAULT="0"
+                       SEQUENCE="false"/>
+
+                <FIELD NAME="lasterror"
+                       TYPE="text"
+                       NOTNULL="false"
+                       SEQUENCE="false"/>
+
+                <FIELD NAME="timecreated"
+                       TYPE="int"
+                       LENGTH="10"
+                       NOTNULL="true"
+                       SEQUENCE="false"/>
+
+                <FIELD NAME="timemodified"
+                       TYPE="int"
+                       LENGTH="10"
+                       NOTNULL="true"
+                       SEQUENCE="false"/>
+
+                <FIELD NAME="timeapproved"
+                       TYPE="int"
+                       LENGTH="10"
+                       NOTNULL="false"
+                       SEQUENCE="false"/>
+
+                <FIELD NAME="timedelivered"
+                       TYPE="int"
+                       LENGTH="10"
+                       NOTNULL="false"
+                       SEQUENCE="false"/>
+            </FIELDS>
+
+            <KEYS>
+                <KEY NAME="primary"
+                     TYPE="primary"
+                     FIELDS="id"/>
+
+                <KEY NAME="useridfk"
+                     TYPE="foreign"
+                     FIELDS="userid"
+                     REFTABLE="user"
+                     REFFIELDS="id"/>
+
+                <KEY NAME="accountidfk"
+                     TYPE="foreign"
+                     FIELDS="accountid"
+                     REFTABLE="payments_accounts"
+                     REFFIELDS="id"/>
+            </KEYS>
+
+            <INDEXES>
+                <INDEX NAME="externalreferenceuk"
+                       UNIQUE="true"
+                       FIELDS="externalreference"/>
+
+                <INDEX NAME="paymentiduk"
+                       UNIQUE="true"
+                       FIELDS="paymentid"/>
+
+                <INDEX NAME="useridix"
+                       UNIQUE="false"
+                       FIELDS="userid"/>
+
+                <INDEX NAME="accountidix"
+                       UNIQUE="false"
+                       FIELDS="accountid"/>
+
+                <INDEX NAME="preferenceidix"
+                       UNIQUE="false"
+                       FIELDS="preferenceid"/>
+
+                <INDEX NAME="internalstatusix"
+                       UNIQUE="false"
+                       FIELDS="internalstatus"/>
+            </INDEXES>
+        </TABLE>
+    </TABLES>
+</XMLDB>

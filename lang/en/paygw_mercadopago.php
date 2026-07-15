@@ -19,3 +19,10 @@ $string['pluginname'] = 'Mercado Pago';
 $string['pluginname_desc'] = 'The Mercado Pago plugin allows payments through Mercado Pago Checkout Pro.';
 $string['privacy:metadata'] = 'The Mercado Pago payment gateway stores transaction information required to process and audit payments.';
 $string['webhooksecret'] = 'Webhook secret';
+
+$string['environment_desc_help'] = 'Select Sandbox for testing or Production to process real payments.';
+$string['accesstoken_desc_help'] = 'Paste the Mercado Pago Access Token for the selected environment. This value is confidential and must not be shared.';
+$string['webhooksecret_desc_help'] = 'Enter the secret configured in Mercado Pago to validate the authenticity of Webhook notifications.';
+
+$string['accesstokeninvalidlength'] = 'The Access Token must contain at least 20 characters.';
+$string['webhooksecretinvalidlength'] = 'The Webhook secret must contain at least 16 characters.';

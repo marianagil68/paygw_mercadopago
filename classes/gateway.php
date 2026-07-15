@@ -1,9 +1,11 @@
 <?php
 namespace paygw_mercadopago;
+use core_text;
 
 defined('MOODLE_INTERNAL') || die();
 
 class gateway extends \core_payment\gateway {
+
     public static function get_supported_currencies(): array {
         return ['ARS'];
     }
@@ -25,19 +27,39 @@ class gateway extends \core_payment\gateway {
             $environments
         );
 
+        $mform->addHelpButton(
+            'environment',
+            'environment_desc',
+            'paygw_mercadopago'
+        );
+
         $mform->addElement(
             'passwordunmask',
             'accesstoken',
             get_string('accesstoken', 'paygw_mercadopago')
         );
+
         $mform->setType('accesstoken', PARAM_RAW_TRIMMED);
+
+        $mform->addHelpButton(
+            'accesstoken',
+            'accesstoken_desc',
+            'paygw_mercadopago'
+        );
 
         $mform->addElement(
             'passwordunmask',
             'webhooksecret',
             get_string('webhooksecret', 'paygw_mercadopago')
         );
+
         $mform->setType('webhooksecret', PARAM_RAW_TRIMMED);
+
+        $mform->addHelpButton(
+            'webhooksecret',
+            'webhooksecret_desc',
+            'paygw_mercadopago'
+        );
     }
 
     public static function validate_gateway_form(
@@ -50,16 +72,30 @@ class gateway extends \core_payment\gateway {
             return;
         }
 
-        if (empty(trim($data->accesstoken ?? ''))) {
+        $accesstoken = trim($data->accesstoken ?? '');
+
+        if ($accesstoken === '') {
             $errors['accesstoken'] = get_string(
                 'accesstokenrequired',
                 'paygw_mercadopago'
             );
+        } else if (mb_strlen($accesstoken) < 20) {
+            $errors['accesstoken'] = get_string(
+                'accesstokeninvalidlength',
+                'paygw_mercadopago'
+            );
         }
 
-        if (empty(trim($data->webhooksecret ?? ''))) {
+        $webhooksecret = trim($data->webhooksecret ?? '');
+
+        if ($webhooksecret === '') {
             $errors['webhooksecret'] = get_string(
                 'webhooksecretrequired',
+                'paygw_mercadopago'
+            );
+        } else if (mb_strlen($webhooksecret) < 16) {
+            $errors['webhooksecret'] = get_string(
+                'webhooksecretinvalidlength',
                 'paygw_mercadopago'
             );
         }

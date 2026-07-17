@@ -34,13 +34,18 @@ class create_preference extends external_api {
                 PARAM_INT,
                 'Item ID'
             ),
+            'description' => new external_value(
+            PARAM_TEXT,
+            'Payment description'
+            )
         ]);
     }
 
     public static function execute(
         string $component,
         string $paymentarea,
-        int $itemid
+        int $itemid,
+        string $description
     ): array {
         global $USER;
 
@@ -50,6 +55,7 @@ class create_preference extends external_api {
                 'component' => $component,
                 'paymentarea' => $paymentarea,
                 'itemid' => $itemid,
+                'description' => $description,                
             ]
         );
 
@@ -91,7 +97,8 @@ class create_preference extends external_api {
         $client = new mercadopago_client($config);
         $service = new payment_service(
             $repository,
-            $client
+            $client,
+            $description
         );
 
         $result = $service->start_payment(
@@ -101,7 +108,8 @@ class create_preference extends external_api {
             $params['paymentarea'],
             $params['itemid'],
             $amount,
-            $currency
+            $currency,
+            $params['description']
         );
 
         return [

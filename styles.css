@@ -1,0 +1,6 @@
+img.icon[src*="/paygw_mercadopago/"] {
+    width: 80px;
+    height: auto;
+    max-width: none;
+    max-height: none;
+}

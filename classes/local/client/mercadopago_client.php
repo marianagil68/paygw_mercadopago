@@ -60,8 +60,8 @@ class mercadopago_client {
         );
 
         $returnurl = new \moodle_url(
-            '/payment/gateway/mercadopago/return.php',
-            ['externalreference' => $externalreference]
+            '/payment/gateway/mercadopago/return.php'
+           
         );
 
         $notificationurl = new \moodle_url(
@@ -381,10 +381,14 @@ class mercadopago_client {
      * @return string Item title.
      */
     private function build_item_title(array $data): string {
+        $description = trim((string) ($data['description'] ?? ''));
+
+        if ($description !== '') {
+            return $description;
+        }
+
         return sprintf(
-            'Moodle payment - %s - %s - %d',
-            trim((string) $data['component']),
-            trim((string) $data['paymentarea']),
+            'Inscripción al curso #%d',
             (int) $data['itemid']
         );
     }

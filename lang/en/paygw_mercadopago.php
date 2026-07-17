@@ -26,3 +26,7 @@ $string['webhooksecret_desc_help'] = 'Enter the secret configured in Mercado Pag
 
 $string['accesstokeninvalidlength'] = 'The Access Token must contain at least 20 characters.';
 $string['webhooksecretinvalidlength'] = 'The Webhook secret must contain at least 16 characters.';
+
+$string['paymentapproved'] = 'The payment was approved. The enrolment will be updated automatically.';
+$string['paymentpending'] = 'The payment is awaiting confirmation.';
+$string['paymentnotcompleted'] = 'The payment was not completed.';

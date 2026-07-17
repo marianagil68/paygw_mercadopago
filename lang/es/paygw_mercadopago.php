@@ -14,7 +14,7 @@ $string['accesstokenrequired'] = 'El Access Token es obligatorio.';
 $string['environment'] = 'Entorno';
 $string['environment_production'] = 'Producción';
 $string['environment_sandbox'] = 'Sandbox';
-$string['gatewaydescription'] = 'Gateway de pagos Mercado Pago utilizando Checkout Pro.';
+$string['gatewaydescription'] = 'Pague de forma segura con Mercado Pago.';
 $string['gatewayname'] = 'Mercado Pago';
 $string['pluginname'] = 'Mercado Pago';
 $string['pluginname_desc'] = 'El plugin Mercado Pago permite cobrar mediante Mercado Pago Checkout Pro.';
@@ -35,3 +35,7 @@ $string['webhooksecret_desc_help'] = 'Ingrese el secreto configurado en Mercado 
 
 $string['accesstokeninvalidlength'] = 'El Access Token debe tener al menos 20 caracteres.';
 $string['webhooksecretinvalidlength'] = 'El secreto del Webhook debe tener al menos 16 caracteres.';
+
+$string['paymentapproved'] = 'El pago fue aprobado. La inscripción se actualizará automáticamente.';
+$string['paymentpending'] = 'El pago está pendiente de confirmación.';
+$string['paymentnotcompleted'] = 'El pago no se completó.';

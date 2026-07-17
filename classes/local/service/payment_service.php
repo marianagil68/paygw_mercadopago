@@ -50,7 +50,8 @@ class payment_service {
         string $paymentarea,
         int $itemid,
         float $amount,
-        string $currency
+        string $currency,
+        string $description
     ): array {
         $this->validate_payment_data(
             $accountid,
@@ -87,6 +88,7 @@ class payment_service {
                 'itemid' => $itemid,
                 'component' => $component,
                 'paymentarea' => $paymentarea,
+                'description' => trim($description),
             ]);
 
             $this->validate_preference_response($preference);

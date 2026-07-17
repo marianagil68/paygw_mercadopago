@@ -65,7 +65,8 @@ class mercadopago_client {
         );
 
         $notificationurl = new \moodle_url(
-            '/payment/gateway/mercadopago/webhook.php'
+            '/payment/gateway/mercadopago/webhook.php',
+            ['accountid' => (int) $data['accountid']]
         );
 
         $payload = [
@@ -309,6 +310,7 @@ class mercadopago_client {
         array $data
     ): void {
         $requiredfields = [
+            'accountid',
             'externalreference',
             'amount',
             'currency',
@@ -355,6 +357,12 @@ class mercadopago_client {
             );
         }
 
+        if ((int) $data['accountid'] <= 0) {
+            throw new \InvalidArgumentException(
+                'Invalid payment account ID.'
+            );
+        }
+        
         if ((int) $data['itemid'] <= 0) {
             throw new \InvalidArgumentException(
                 'Invalid preference item ID.'

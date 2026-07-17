@@ -82,6 +82,7 @@ class payment_service {
 
         try {
             $preference = $this->client->create_preference([
+                'accountid' => $accountid,
                 'externalreference' => $externalreference,
                 'amount' => $amount,
                 'currency' => $currency,

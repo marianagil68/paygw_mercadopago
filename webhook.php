@@ -14,6 +14,7 @@ use core_payment\account_gateway;
 use paygw_mercadopago\local\client\mercadopago_client;
 use paygw_mercadopago\local\dto\webhook_notification;
 use paygw_mercadopago\local\exception\invalid_webhook_exception;
+use paygw_mercadopago\local\repository\transaction_repository;
 use paygw_mercadopago\local\service\payment_confirmation_service;
 use paygw_mercadopago\local\service\webhook_service;
 use paygw_mercadopago\local\validation\webhook_signature_validator;
@@ -70,13 +71,20 @@ try {
     }
 
     $topic = trim(
-        (string)(
-            $jsonbody['type']
-            ?? $jsonbody['topic']
-            ?? ($_GET['type'] ?? '')
-            ?? ($_GET['topic'] ?? '')
-        )
+        (string)($jsonbody['type'] ?? '')
     );
+
+    if ($topic === '') {
+        $topic = trim(
+            (string)($jsonbody['topic'] ?? '')
+        );
+    }
+
+    if ($topic === '') {
+        $topic = trim(
+            (string)($_GET['type'] ?? '')
+        );
+    }
 
     if ($topic === '') {
         $topic = trim(
@@ -84,20 +92,66 @@ try {
         );
     }
 
+    if ($topic === '') {
+        throw new invalid_webhook_exception(
+            'No se recibió el tipo de notificación.'
+        );
+    }
+
+    /*
+     * Esta integración procesa únicamente notificaciones de pagos.
+     * Mercado Pago también puede enviar notificaciones legacy de
+     * merchant_order, que se reconocen pero no se procesan.
+     */
+    if ($topic !== 'payment') {
+        paygw_mercadopago_webhook_response(
+            200,
+            'ignored'
+        );
+    }
+
+    /*
+    * Las notificaciones legacy IPN utilizan id y topic en la URL.
+    * Esta integración procesa únicamente Webhooks modernos con data.id.
+    */
+    if (!array_key_exists('data_id', $_GET)) {
+        paygw_mercadopago_webhook_response(
+            200,
+            'ignored'
+        );
+    }
+
+
+    /*
+     * Mercado Pago construye la firma con data.id recibido en la URL.
+     * PHP convierte el nombre data.id en data_id dentro de $_GET.
+     */
     $paymentid = trim(
-        (string)(
-            $jsonbody['data']['id']
-            ?? $jsonbody['id']
-            ?? ($_GET['data_id'] ?? '')
-            ?? ($_GET['id'] ?? '')
-        )
+        (string)($_GET['data_id'] ?? '')
     );
 
     if ($paymentid === '') {
-        $paymentid = trim(
-            (string)($_GET['id'] ?? '')
+        throw new invalid_webhook_exception(
+            'No se recibió el identificador del pago.'
         );
-    }    
+    }
+
+    /*
+     * Se conserva el cuerpo como alternativa para compatibilidad con
+     * notificaciones que no incluyan data.id en la URL.
+     */
+    if ($paymentid === '') {
+        $paymentid = trim(
+            (string)($jsonbody['data']['id'] ?? '')
+        );
+    }
+
+    if ($paymentid === '') {
+        throw new invalid_webhook_exception(
+            'No se recibió el identificador del pago.'
+        );
+    }
+
     $signature = trim(
         (string)($_SERVER['HTTP_X_SIGNATURE'] ?? '')
     );
@@ -106,12 +160,7 @@ try {
         (string)($_SERVER['HTTP_X_REQUEST_ID'] ?? '')
     );
 
-    if (
-        $topic === ''
-        || $paymentid === ''
-        || $signature === ''
-        || $requestid === ''
-    ) {
+    if ($signature === '' || $requestid === '') {
         throw new invalid_webhook_exception(
             'La notificación Webhook está incompleta.'
         );
@@ -134,6 +183,13 @@ try {
         (string)($gatewayconfig['webhooksecret'] ?? '')
     );
 
+    $environment = trim(
+        (string)($gatewayconfig['environment'] ?? 'production')
+    );
+
+    $validatesignature = $environment === 'production';
+
+
     if ($webhooksecret === '') {
         throw new invalid_webhook_exception(
             'La clave secreta del Webhook no está configurada.'
@@ -154,9 +210,11 @@ try {
     );
 
     $signaturevalidator = new webhook_signature_validator();
+    $repository = new transaction_repository();
 
     $paymentconfirmation = new payment_confirmation_service(
-        $client
+        $client,
+        $repository
     );
 
     $webhookservice = new webhook_service(
@@ -166,7 +224,8 @@ try {
 
     $webhookservice->process(
         $notification,
-        $webhooksecret
+        $webhooksecret,
+        $validatesignature
     );
 
     paygw_mercadopago_webhook_response(
@@ -174,6 +233,10 @@ try {
         'ok'
     );
 } catch (invalid_webhook_exception $exception) {
+    error_log(
+        'Mercado Pago webhook inválido: '
+        . $exception->getMessage()
+    );
 
     paygw_mercadopago_webhook_response(
         400,

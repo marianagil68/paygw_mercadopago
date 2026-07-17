@@ -56,7 +56,8 @@ class webhook_service {
      */
     public function process(
         webhook_notification $notification,
-        string $secret
+        string $secret,
+        bool $validatesignature = true
     ): void {
         if ($notification->get_topic() !== 'payment') {
             throw new invalid_webhook_exception(
@@ -64,10 +65,12 @@ class webhook_service {
             );
         }
 
-        $this->signaturevalidator->validate(
-            $notification,
-            $secret
-        );
+        if ($validatesignature) {
+            $this->signaturevalidator->validate(
+                $notification,
+                $secret
+            );
+        }
 
         $this->paymentconfirmation->confirm(
             $notification->get_paymentid()

@@ -11,6 +11,7 @@ define('NO_DEBUG_DISPLAY', true);
 require_once(__DIR__ . '/../../../config.php');
 
 use core_payment\account_gateway;
+use paygw_mercadopago\local\client\mercadopago_client;
 use paygw_mercadopago\local\dto\webhook_notification;
 use paygw_mercadopago\local\exception\invalid_webhook_exception;
 use paygw_mercadopago\local\service\payment_confirmation_service;
@@ -72,20 +73,31 @@ try {
         (string)(
             $jsonbody['type']
             ?? $jsonbody['topic']
-            ?? optional_param('type', '', PARAM_RAW_TRIMMED)
-            ?? optional_param('topic', '', PARAM_RAW_TRIMMED)
+            ?? ($_GET['type'] ?? '')
+            ?? ($_GET['topic'] ?? '')
         )
     );
+
+    if ($topic === '') {
+        $topic = trim(
+            (string)($_GET['topic'] ?? '')
+        );
+    }
 
     $paymentid = trim(
         (string)(
             $jsonbody['data']['id']
             ?? $jsonbody['id']
-            ?? optional_param('data.id', '', PARAM_RAW_TRIMMED)
-            ?? optional_param('id', '', PARAM_RAW_TRIMMED)
+            ?? ($_GET['data_id'] ?? '')
+            ?? ($_GET['id'] ?? '')
         )
     );
 
+    if ($paymentid === '') {
+        $paymentid = trim(
+            (string)($_GET['id'] ?? '')
+        );
+    }    
     $signature = trim(
         (string)($_SERVER['HTTP_X_SIGNATURE'] ?? '')
     );
@@ -105,12 +117,10 @@ try {
         );
     }
 
-    $accountgateway = account_gateway::get_record(
-        [
-            'accountid' => $accountid,
-            'gateway' => 'mercadopago',
-        ]
-    );
+    $accountgateway = account_gateway::get_record([
+        'accountid' => $accountid,
+        'gateway' => 'mercadopago',
+    ]);
 
     if (!$accountgateway) {
         throw new invalid_webhook_exception(
@@ -137,9 +147,17 @@ try {
         $requestid
     );
 
+    $clientconfig = (object)$gatewayconfig;
+
+    $client = new mercadopago_client(
+        $clientconfig
+    );
+
     $signaturevalidator = new webhook_signature_validator();
 
-    $paymentconfirmation = new payment_confirmation_service();
+    $paymentconfirmation = new payment_confirmation_service(
+        $client
+    );
 
     $webhookservice = new webhook_service(
         $signaturevalidator,
@@ -156,19 +174,21 @@ try {
         'ok'
     );
 } catch (invalid_webhook_exception $exception) {
-    debugging(
-        $exception->getMessage(),
-        DEBUG_DEVELOPER
-    );
 
     paygw_mercadopago_webhook_response(
         400,
         'invalid_notification'
     );
 } catch (\Throwable $exception) {
-    debugging(
-        $exception->getMessage(),
-        DEBUG_DEVELOPER
+    error_log(
+        'Mercado Pago webhook error: '
+        . get_class($exception)
+        . ' - '
+        . $exception->getMessage()
+        . ' en '
+        . $exception->getFile()
+        . ':'
+        . $exception->getLine()
     );
 
     paygw_mercadopago_webhook_response(

@@ -51,27 +51,26 @@ class webhook_service {
      * Procesa una notificación Webhook.
      *
      * @param webhook_notification $notification Notificación ya normalizada.
+     * @param string $secret Clave secreta configurada para validar la firma.
      * @throws invalid_webhook_exception Si la notificación es inválida.
      */
     public function process(
         webhook_notification $notification,
         string $secret
     ): void {
-        if ($notification->topic !== 'payment') {
+        if ($notification->get_topic() !== 'payment') {
             throw new invalid_webhook_exception(
                 'El tipo de notificación no es soportado.'
             );
         }
 
         $this->signaturevalidator->validate(
-            $notification->signature,
-            $notification->requestid,
-            $notification->paymentid,
-            secret
+            $notification,
+            $secret
         );
 
         $this->paymentconfirmation->confirm(
-            $notification->paymentid
+            $notification->get_paymentid()
         );
     }
 }

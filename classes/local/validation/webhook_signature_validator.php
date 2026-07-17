@@ -10,6 +10,7 @@ namespace paygw_mercadopago\local\validation;
 
 defined('MOODLE_INTERNAL') || die();
 
+use paygw_mercadopago\local\dto\webhook_notification;
 use paygw_mercadopago\local\exception\invalid_webhook_exception;
 
 /**
@@ -20,21 +21,17 @@ class webhook_signature_validator {
     /**
      * Valida la firma del Webhook.
      *
-     * @param string $signature Valor del encabezado x-signature.
-     * @param string $requestid Valor del encabezado x-request-id.
-     * @param string $paymentid Identificador del pago informado por Mercado Pago.
+     * @param webhook_notification $notification Notificación recibida.
      * @param string $secret Secreto configurado para el Webhook.
      * @throws invalid_webhook_exception Si la firma no es válida.
      */
     public function validate(
-        string $signature,
-        string $requestid,
-        string $paymentid,
+        webhook_notification $notification,
         string $secret
     ): void {
-        $signature = trim($signature);
-        $requestid = trim($requestid);
-        $paymentid = trim($paymentid);
+        $signature = trim($notification->get_signature());
+        $requestid = trim($notification->get_requestid());
+        $paymentid = trim($notification->get_paymentid());
         $secret = trim($secret);
 
         if ($signature === '') {
@@ -67,7 +64,7 @@ class webhook_signature_validator {
 
         $manifest = sprintf(
             'id:%s;request-id:%s;ts:%s;',
-            strtolower($paymentid),
+            $paymentid,
             $requestid,
             $timestamp
         );

@@ -13,5 +13,5 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Excepción lanzada cuando una notificación Webhook no supera las validaciones.
  */
-class invalid_webhook_exception extends \runtime_exception {
+class invalid_webhook_exception extends \RuntimeException {
 }
